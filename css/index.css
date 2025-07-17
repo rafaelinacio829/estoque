@@ -1,0 +1,157 @@
+/* Configurações Globais */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #ffffff;
+    color: #1d1d1f;
+    overflow: hidden; /* Evita barras de rolagem causadas pela animação */
+}
+
+/* Cabeçalho */
+.page-header {
+    position: absolute;
+    top: 20px;
+    left: 30px;
+    font-size: 20px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.apple-logo {
+    font-size: 22px;
+    margin-right: 8px;
+    font-weight: 500;
+}
+
+/* Container principal */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* --- ESTILOS DA ANIMAÇÃO --- */
+
+/* O container que segura todos os elementos da animação */
+.animation-container {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* O ícone central que fica parado e pulsando */
+.center-icon {
+    width: 80px;
+    height: 80px;
+    background-color: #f0f0f0;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #0071e3;
+    z-index: 10;
+    animation: pulse 2.5s infinite ease-in-out;
+}
+
+.center-icon svg {
+    width: 40px;
+    height: 40px;
+}
+
+/* Estilo base para todos os ícones que orbitam */
+.orbit-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    margin: -30px; /* Metade da largura/altura para centralizar a origem da rotação */
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+    animation: orbit 15s linear infinite; /* Aplica a animação de órbita */
+}
+
+.orbit-icon svg {
+    width: 28px;
+    height: 28px;
+    opacity: 0.8;
+}
+
+/* Atrasos diferentes para cada ícone, para que fiquem espaçados */
+.icon-box { animation-delay: 0s; }
+.icon-scan { animation-delay: -3.75s; } /* 15s / 4 ícones = 3.75s de intervalo */
+.icon-chart { animation-delay: -7.5s; }
+.icon-truck { animation-delay: -11.25s; }
+
+
+/* --- KEYFRAMES (A definição da animação) --- */
+
+/* Animação de órbita */
+@keyframes orbit {
+    from {
+        transform: rotate(0deg) translateX(110px) rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg) translateX(110px) rotate(-360deg);
+    }
+}
+
+/* Animação de pulsação para o ícone central */
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 15px rgba(0, 113, 227, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 113, 227, 0);
+    }
+}
+
+
+/* --- Título e Botão (sem alterações) --- */
+.main-title {
+    font-size: 80px;
+    font-weight: 700;
+    margin: 20px 0;
+    letter-spacing: -2px;
+}
+
+.signin-button {
+    display: inline-block;
+    background-color: #1d1d1f;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-size: 17px;
+    font-weight: 400;
+    margin-top: 25px;
+    transition: transform 0.2s ease-out, background-color 0.2s;
+}
+
+.signin-button:hover {
+    transform: scale(1.05);
+    background-color: #000;
+}
