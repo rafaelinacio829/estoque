@@ -1,0 +1,17 @@
+{
+  "name": "estoque",
+  "version": "1.0.0",
+  "description": "Sistema de gestao de estoque",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rafael Inacio",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "express": "^4.19.2",
+    "mysql2": "^3.10.0"
+  }
+}
