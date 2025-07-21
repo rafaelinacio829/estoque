@@ -1,46 +1,31 @@
-/* =================================================================== */
-/* DESIGN DARK MODE COMPLETO (COM BOTÕES DE VIDRO ESCURO)              */
-/* =================================================================== */
-
-/* --- 1. VARIÁVEIS DE COR (TEMA ESCURO) --- */
+/* --- GLOBAIS E VARIÁVEIS DE COR --- */
 :root {
     --sidebar-bg: #1e293b;
-    --content-bg: #111827; /* Fundo principal escuro */
-    --card-bg: #1f2937;    /* Fundo dos cards e tabelas */
-    --glass-btn-bg: rgba(55, 65, 81, 0.5); /* Fundo do botão de vidro */
+    --content-bg: #111827;
+    --card-bg: #1f2937;
+    --glass-btn-bg: rgba(55, 65, 81, 0.5);
     --glass-btn-bg-hover: rgba(75, 85, 99, 0.6);
-
-    --text-primary: #f9fafb;       /* Branco quase puro */
-    --text-secondary: #9ca3af;   /* Cinza para textos secundários */
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
     --sidebar-text: #e5e7eb;
-
     --border-color: #374151;
     --border-glass: rgba(255, 255, 255, 0.1);
-
     --accent-blue: #3b82f6;
-    --accent-edit: #38bdf8; /* Azul ciano para Editar */
-    --accent-delete: #f43f5e; /* Vermelho rosado para Excluir */
-
-    --tag-entrada-bg: #10b981;
-    --tag-saida-bg: #f59e0b;
-    --tag-text: #ffffff;
-
+    --accent-edit: #38bdf8;
+    --accent-delete: #f43f5e;
     --font-family: 'Inter', sans-serif;
 }
 
-/* --- 2. ESTILOS GLOBAIS --- */
 body {
     margin: 0;
     font-family: var(--font-family);
     background-color: var(--content-bg);
     color: var(--text-primary);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
 .dashboard-container { display: flex; min-height: 100vh; }
 
-/* --- 3. SIDEBAR (BARRA LATERAL) --- */
+/* --- SIDEBAR --- */
 .sidebar {
     width: 250px;
     background-color: var(--sidebar-bg);
@@ -51,10 +36,7 @@ body {
     flex-shrink: 0;
     border-right: 1px solid var(--border-color);
 }
-.sidebar-header {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
-}
-.sidebar-header .logo-icon { color: var(--accent-blue); }
+.sidebar-header { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
 .sidebar-header h1 { font-size: 20px; margin: 0; font-weight: 600; color: #fff; }
 .sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
 .sidebar-nav .nav-link {
@@ -63,127 +45,78 @@ body {
     color: var(--sidebar-text); font-weight: 500;
     transition: background-color 0.2s, color 0.2s;
 }
-.sidebar-nav .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #fff;
-}
-.sidebar-nav .nav-link.active {
-    background-color: var(--accent-blue);
-    color: #fff;
-}
-.sidebar-nav .nav-link svg { flex-shrink: 0; }
-.nav-group .submenu {
-    list-style: none; padding-left: 32px; max-height: 0;
-    overflow: hidden; transition: max-height 0.3s ease-out;
-}
+.sidebar-nav .nav-link:hover { background-color: rgba(255, 255, 255, 0.05); color: #fff; }
+.sidebar-nav .nav-link.active { background-color: var(--accent-blue); color: #fff; }
+.nav-group .submenu { list-style: none; padding-left: 32px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
 .nav-group.open .submenu { max-height: 200px; margin-top: 8px; }
-.submenu a {
-    display: block; padding: 8px 12px; color: var(--sidebar-text);
-    text-decoration: none; border-radius: 6px; font-size: 14px;
-}
-.submenu a:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #fff;
-}
+.submenu a { display: block; padding: 8px 12px; color: var(--sidebar-text); text-decoration: none; border-radius: 6px; font-size: 14px; }
+.submenu a:hover { background-color: rgba(255, 255, 255, 0.05); color: #fff; }
 
-/* --- 4. CONTEÚDO PRINCIPAL --- */
-.main-content {
-    flex-grow: 1;
-    padding: 24px 32px;
-}
-.main-header {
-    display: flex; justify-content: flex-end; align-items: center;
-    margin-bottom: 32px;
-}
-.user-info {
-    display: flex; align-items: center; gap: 16px;
-    font-size: 14px; color: var(--text-secondary);
-}
+/* --- CONTEÚDO PRINCIPAL --- */
+.main-content { flex-grow: 1; padding: 24px 32px; }
+.main-header { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 32px; }
+.user-info { display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--text-secondary); }
 .user-info strong { color: var(--text-primary); }
-.logout-link {
-    display: flex; align-items: center; gap: 6px;
-    text-decoration: none; color: var(--text-secondary);
-}
+.logout-link { display: flex; align-items: center; gap: 6px; text-decoration: none; color: var(--text-secondary); }
 .logout-link:hover { color: var(--text-primary); }
-.page-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 24px;
-}
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .page-header h2 { font-size: 28px; margin: 0; font-weight: 700; }
 
-/* --- 5. BOTÕES DARK MODE GLASS (ESTILO UNIFICADO) --- */
+/* --- BOTÕES --- */
 .btn {
-    padding: 10px 18px;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-
-    background: var(--glass-btn-bg);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid var(--border-glass);
+    padding: 10px 18px; border-radius: 12px; font-weight: 600;
+    cursor: pointer; display: inline-flex; align-items: center;
+    gap: 8px; font-size: 14px; border: 1px solid var(--border-glass);
+    background: var(--glass-btn-bg); backdrop-filter: blur(8px);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.3);
-
-    color: var(--text-primary);
-    transition: all 0.2s ease-in-out;
+    color: var(--text-primary); transition: all 0.2s ease-in-out;
 }
-
-.btn:hover {
-    background: var(--glass-btn-bg-hover);
-    transform: translateY(-2px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-.btn:active {
-    transform: translateY(0);
-}
-
-/* Variação para o botão primário (+ Cadastrar Item) */
-.btn.btn-primary {
-    background: var(--accent-blue);
-    border: none;
-    color: #fff;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-}
+.btn:hover { background: var(--glass-btn-bg-hover); transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.4); }
+.btn:active { transform: translateY(0); }
+.btn.btn-primary { background: var(--accent-blue); border: none; color: #fff; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
 .btn.btn-primary:hover { background: #2563eb; }
-
-/* Variação para os botões de ação na tabela */
 .action-btn { padding: 6px 14px; font-size: 13px; }
 .action-btn.btn-edit { color: var(--accent-edit); }
 .action-btn.btn-delete { color: var(--accent-delete); }
 
-/* --- 6. CARDS E TABELA --- */
-.stats-cards {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 24px; margin-bottom: 32px;
-}
-.card, .recent-activities {
-    background-color: var(--card-bg);
-    padding: 24px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-}
-.card-icon {
-    width: 48px; height: 48px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.card-icon.icon-sku { background-color: #1e3a8a; color: #93c5fd; }
-.card-icon.icon-alert { background-color: #9a3412; color: #fdba74; }
-.card-icon.icon-empty { background-color: #991b1b; color: #fca5a5; }
-.card-info .card-value { font-size: 28px; font-weight: 700; display: block; }
-.card-info .card-label { font-size: 14px; color: var(--text-secondary); }
+/* --- TABELA --- */
+.recent-activities { background-color: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); }
 .recent-activities h3 { margin-top: 0; font-size: 18px; }
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
 thead th { font-size: 12px; text-transform: uppercase; color: var(--text-secondary); }
 tbody tr:last-child td { border-bottom: none; }
-.tag {
-    padding: 4px 10px; border-radius: 999px;
-    font-size: 12px; font-weight: 600;
+
+/* --- MODAL --- */
+.modal {
+    display: none; position: fixed; z-index: 1000;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease-in-out;
 }
-.tag-entrada { background-color: var(--tag-entrada-bg); color: var(--tag-text); }
-.tag-saida { background-color: var(--tag-saida-bg); color: var(--tag-text); }
+.modal-content {
+    background: #1f2937;
+    margin: 10% auto; padding: 30px;
+    border: 1px solid var(--border-color);
+    width: 90%; max-width: 500px; border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.4s ease-in-out;
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px; }
+.modal-header h2 { margin: 0; color: #fff; }
+.close-button { color: var(--text-secondary); font-size: 28px; font-weight: bold; background: none; border: none; cursor: pointer; transition: color 0.2s; }
+.close-button:hover { color: #fff; }
+.form-group { margin-bottom: 20px; }
+.form-group-row { display: flex; gap: 20px; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-secondary); }
+.form-group input {
+    width: 100%; padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 8px; color: #fff; font-size: 16px;
+    box-sizing: border-box;
+}
+.form-actions { text-align: right; margin-top: 30px; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
