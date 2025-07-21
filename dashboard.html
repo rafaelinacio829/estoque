@@ -14,12 +14,18 @@
 <div class="main-container">
   <aside class="sidebar">
     <div class="sidebar-header">
-      <h2>StockFlow</h2>
+      <h2>Gestão</h2>
     </div>
     <nav class="sidebar-nav">
-      <a href="#" class="nav-item active">Visão Geral</a>
-      <a href="produtos.html" class="nav-item">Produtos</a>
-      <a href="#" class="nav-item">Inventário</a>
+      <a href="dashboard.html" class="nav-item">Visão Geral</a>
+
+      <div class="nav-group">
+        <a href="#" class="nav-item has-submenu">Inventário</a>
+        <div class="submenu">
+          <a href="produtos.html" class="submenu-item">Produtos</a>
+        </div>
+      </div>
+
       <a href="#" class="nav-item">Relatórios</a>
       <a href="#" class="nav-item">Configurações</a>
     </nav>
@@ -37,11 +43,10 @@
     <div class="card-grid">
       <div class="card">
         <h3>Produtos Ativos</h3>
-        <p class="card-value">1,250</p>
-      </div>
+        <p class="card-value" id="product-count">...</p> </div>
       <div class="card">
         <h3>Itens em Baixo Estoque</h3>
-        <p class="card-value">42</p>
+        <p class="card-value" id="low-stock-count">...</p>
       </div>
       <div class="card">
         <h3>Pedidos Pendentes</h3>
@@ -54,6 +59,10 @@
     </div>
   </main>
 </div>
-
+\\SCRIPTS
+<script src="dashboard.js"></script>
+<script src="sidebar.js"></script>
+<script src="dashboard.js"></script> </body>
+</html>
 </body>
 </html>

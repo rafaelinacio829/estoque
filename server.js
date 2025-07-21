@@ -85,6 +85,80 @@ app.post('/register', async (req, res) => {
         res.status(500).json({ success: false, message: 'Erro ao processar o registro.' });
     }
 });
+// --- NOVA ROTA: Adicionar um novo produto ---
+app.post('/api/produtos', async (req, res) => {
+    const { nome, sku, estoque, preco } = req.body;
+
+    console.log('[LOG] Recebida requisição para adicionar novo produto:', req.body);
+
+    // Validação simples dos dados recebidos
+    if (!nome || !sku || estoque === undefined || !preco) {
+        return res.status(400).json({ success: false, message: 'Todos os campos são obrigatórios.' });
+    }
+
+    try {
+        const sql = 'INSERT INTO produtos (nome, sku, estoque, preco) VALUES (?, ?, ?, ?)';
+        const [result] = await pool.query(sql, [nome, sku, estoque, preco]);
+
+        console.log(`[SUCESSO] Produto '${nome}' adicionado com o ID: ${result.insertId}`);
+        res.status(201).json({ success: true, message: 'Produto adicionado com sucesso!', productId: result.insertId });
+
+    } catch (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ success: false, message: 'O SKU informado já existe.' });
+        }
+        console.error("[ERRO] Falha ao adicionar produto:", err);
+        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+    }
+});
+// --- NOVA ROTA: Listar todos os produtos ---
+app.get('/api/produtos', async (req, res) => {
+    console.log('[LOG] Recebida requisição para listar produtos.');
+    try {
+        // Seleciona todos os produtos, ordenando pelos mais recentes primeiro
+        const sql = 'SELECT * FROM produtos ORDER BY id DESC';
+        const [products] = await pool.query(sql);
+
+        // Envia a lista de produtos como resposta JSON
+        res.json(products);
+
+    } catch (err) {
+        console.error("[ERRO] Falha ao listar produtos:", err);
+        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+    }
+});
+// --- NOVA ROTA: Contar produtos com baixo estoque (estoque < 2) ---
+app.get('/api/produtos/low-stock-count', async (req, res) => {
+    console.log('[LOG] Recebida requisição para contagem de produtos com baixo estoque.');
+    try {
+        // A condição WHERE estoque < 2 é a chave aqui
+        const sql = 'SELECT COUNT(*) as total FROM produtos WHERE estoque < 2';
+        const [rows] = await pool.query(sql);
+        const total = rows[0].total;
+
+        res.json({ success: true, total: total });
+
+    } catch (err) {
+        console.error("[ERRO] Falha ao contar produtos com baixo estoque:", err);
+        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+    }
+});
+// --- NOVA ROTA: Contar o total de produtos ---
+app.get('/api/produtos/count', async (req, res) => {
+    console.log('[LOG] Recebida requisição para contagem de produtos.');
+    try {
+        const sql = 'SELECT COUNT(*) as total FROM produtos';
+        const [rows] = await pool.query(sql);
+        const total = rows[0].total; // Pega o valor da contagem
+
+        res.json({ success: true, total: total });
+
+    } catch (err) {
+        console.error("[ERRO] Falha ao contar produtos:", err);
+        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+    }
+});
+
 
 // Inicia o servidor
 app.listen(PORT, () => {

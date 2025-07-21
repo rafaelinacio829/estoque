@@ -10,7 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
 <div class="main-container">
   <aside class="sidebar">
     <div class="sidebar-header">
@@ -18,8 +17,14 @@
     </div>
     <nav class="sidebar-nav">
       <a href="dashboard.html" class="nav-item">Visão Geral</a>
-      <a href="produtos.html" class="nav-item active">Produtos</a>
-      <a href="#" class="nav-item">Inventário</a>
+
+      <div class="nav-group">
+        <a href="#" class="nav-item has-submenu">Inventário</a>
+        <div class="submenu">
+          <a href="produtos.html" class="submenu-item">Produtos</a>
+        </div>
+      </div>
+
       <a href="#" class="nav-item">Relatórios</a>
       <a href="#" class="nav-item">Configurações</a>
     </nav>
@@ -31,60 +36,52 @@
   <main class="content-area">
     <header class="content-header">
       <h1>Gerenciamento de Produtos</h1>
-      <button class="add-product-btn">+ Adicionar Produto</button>
+      <button class="add-product-btn" id="openModalBtn">+ Adicionar Produto</button>
     </header>
-
     <div class="table-container">
       <table>
-        <thead>
-        <tr>
-          <th>ID</th>
-          <th>Produto</th>
-          <th>SKU</th>
-          <th>Estoque</th>
-          <th>Preço</th>
-          <th>Ações</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-          <td>1</td>
-          <td>Mouse Gamer Pro X</td>
-          <td>MG-PROX-001</td>
-          <td>150 un.</td>
-          <td>R$ 299,90</td>
-          <td>
-            <button class="action-btn btn-edit">Editar</button>
-            <button class="action-btn btn-delete">Excluir</button>
-          </td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Teclado Mecânico K87</td>
-          <td>TM-K87-RGB</td>
-          <td>85 un.</td>
-          <td>R$ 499,90</td>
-          <td>
-            <button class="action-btn btn-edit">Editar</button>
-            <button class="action-btn btn-delete">Excluir</button>
-          </td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>Monitor UltraWide 34"</td>
-          <td>MON-UW34-LG</td>
-          <td>32 un.</td>
-          <td>R$ 2.499,00</td>
-          <td>
-            <button class="action-btn btn-edit">Editar</button>
-            <button class="action-btn btn-delete">Excluir</button>
-          </td>
-        </tr>
+        <thead>...</thead>
+        <tbody id="product-table-body">
         </tbody>
       </table>
     </div>
   </main>
 </div>
 
+<div id="addProductModal" class="modal">
+  <div class="modal-content">
+    <header class="modal-header">
+      <h2>Adicionar Novo Produto</h2>
+      <button id="closeModalBtn" class="close-button">&times;</button>
+    </header>
+    <form id="addProductForm">
+      <div class="form-group">
+        <label for="nome">Nome do Produto</label>
+        <input type="text" id="nome" name="nome" required>
+      </div>
+      <div class="form-group">
+        <label for="sku">SKU (Código)</label>
+        <input type="text" id="sku" name="sku" required>
+      </div>
+      <div class="form-group-row">
+        <div class="form-group">
+          <label for="estoque">Estoque Inicial</label>
+          <input type="number" id="estoque" name="estoque" required min="0">
+        </div>
+        <div class="form-group">
+          <label for="preco">Preço (R$)</label>
+          <input type="number" id="preco" name="preco" required min="0.01" step="0.01">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="submit-btn">Cadastrar Produto</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="produtos.js"></script>
+<script src="sidebar.js"></script>
+<script src="dashboard.js"></script> </body>
+</html>
 </body>
 </html>
