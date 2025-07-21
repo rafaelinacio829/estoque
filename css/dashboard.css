@@ -1,255 +1,189 @@
-/* --- 1. Definição das Variáveis de Cor (Tema Claro como Padrão) --- */
+/* =================================================================== */
+/* DESIGN DARK MODE COMPLETO (COM BOTÕES DE VIDRO ESCURO)              */
+/* =================================================================== */
+
+/* --- 1. VARIÁVEIS DE COR (TEMA ESCURO) --- */
 :root {
-    /* Fundos */
-    --body-bg: #f5f5f7;
-    --sidebar-bg: #ffffff;
-    --card-bg: #ffffff;
-    --table-bg: #ffffff;
-    --hover-bg: #e8e8ed;
+    --sidebar-bg: #1e293b;
+    --content-bg: #111827; /* Fundo principal escuro */
+    --card-bg: #1f2937;    /* Fundo dos cards e tabelas */
+    --glass-btn-bg: rgba(55, 65, 81, 0.5); /* Fundo do botão de vidro */
+    --glass-btn-bg-hover: rgba(75, 85, 99, 0.6);
 
-    /* Textos */
-    --text-primary: #1d1d1f;
-    --text-secondary: #6e6e73;
-    --text-on-accent: #ffffff;
-    --link-color: #0066cc;
+    --text-primary: #f9fafb;       /* Branco quase puro */
+    --text-secondary: #9ca3af;   /* Cinza para textos secundários */
+    --sidebar-text: #e5e7eb;
 
-    /* Bordas e Sombras */
-    --border-color: #d2d2d7;
-    --shadow-color: rgba(0, 0, 0, 0.1);
+    --border-color: #374151;
+    --border-glass: rgba(255, 255, 255, 0.1);
 
-    /* Cores de Acento */
-    --accent-primary: #0071e3;
-    --accent-delete: #d9363e;
+    --accent-blue: #3b82f6;
+    --accent-edit: #38bdf8; /* Azul ciano para Editar */
+    --accent-delete: #f43f5e; /* Vermelho rosado para Excluir */
+
+    --tag-entrada-bg: #10b981;
+    --tag-saida-bg: #f59e0b;
+    --tag-text: #ffffff;
+
+    --font-family: 'Inter', sans-serif;
 }
 
-/* --- 2. Redefinição das Variáveis para o Tema Escuro --- */
-@media (prefers-color-scheme: dark) {
-    :root {
-        /* Fundos */
-        --body-bg: url('https://images.unsplash.com/photo-1553095066-5014bc7b7f2d?q=80&w=2787&auto=format&fit=crop');
-        --sidebar-bg: rgba(10, 25, 47, 0.3);
-        --card-bg: rgba(30, 41, 59, 0.3);
-        --table-bg: rgba(30, 41, 59, 0.3);
-        --hover-bg: rgba(255, 255, 255, 0.05);
-
-        /* Textos */
-        --text-primary: #ffffff;
-        --text-secondary: #a8b2d1;
-        --text-on-accent: #ffffff;
-        --link-color: #2b91ff;
-
-        /* Bordas e Sombras */
-        --border-color: rgba(255, 255, 255, 0.1);
-        --shadow-color: rgba(0, 0, 0, 0.2);
-
-        /* Cores de Acento */
-        --accent-primary: #0071e3;
-        --accent-delete: rgba(255, 0, 0, 0.4);
-    }
-
-    /* O efeito de vidro só se aplica no modo escuro */
-    .sidebar, .card, .table-container {
-        backdrop-filter: blur(15px) saturate(180%);
-        -webkit-backdrop-filter: blur(15px) saturate(180%);
-    }
-}
-
-/* --- 3. Estilos da Aplicação Usando as Variáveis --- */
-
-/* Configuração Geral */
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
+/* --- 2. ESTILOS GLOBAIS --- */
 body {
-    background: var(--body-bg);
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    margin: 0;
+    font-family: var(--font-family);
+    background-color: var(--content-bg);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* Layout Principal */
-.main-container {
-    display: flex;
-    height: 100vh;
-}
+.dashboard-container { display: flex; min-height: 100vh; }
 
-/* Barra Lateral (Sidebar) */
+/* --- 3. SIDEBAR (BARRA LATERAL) --- */
 .sidebar {
-    width: 260px;
-    background: var(--sidebar-bg);
+    width: 250px;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
     border-right: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    transition: background-color 0.3s;
+}
+.sidebar-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
+}
+.sidebar-header .logo-icon { color: var(--accent-blue); }
+.sidebar-header h1 { font-size: 20px; margin: 0; font-weight: 600; color: #fff; }
+.sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
+.sidebar-nav .nav-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; border-radius: 8px; text-decoration: none;
+    color: var(--sidebar-text); font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+}
+.sidebar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+.sidebar-nav .nav-link.active {
+    background-color: var(--accent-blue);
+    color: #fff;
+}
+.sidebar-nav .nav-link svg { flex-shrink: 0; }
+.nav-group .submenu {
+    list-style: none; padding-left: 32px; max-height: 0;
+    overflow: hidden; transition: max-height 0.3s ease-out;
+}
+.nav-group.open .submenu { max-height: 200px; margin-top: 8px; }
+.submenu a {
+    display: block; padding: 8px 12px; color: var(--sidebar-text);
+    text-decoration: none; border-radius: 6px; font-size: 14px;
+}
+.submenu a:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #fff;
 }
 
-.sidebar-header h2 {
-    color: var(--text-primary);
-    font-size: 24px;
-    margin-bottom: 40px;
-}
-
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+/* --- 4. CONTEÚDO PRINCIPAL --- */
+.main-content {
     flex-grow: 1;
+    padding: 24px 32px;
 }
-
-.nav-item {
-    color: var(--text-secondary);
-    text-decoration: none;
-    padding: 12px 15px;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: background-color 0.3s, color 0.3s;
+.main-header {
+    display: flex; justify-content: flex-end; align-items: center;
+    margin-bottom: 32px;
 }
-
-.nav-item:hover {
-    background-color: var(--hover-bg);
-    color: var(--text-primary);
+.user-info {
+    display: flex; align-items: center; gap: 16px;
+    font-size: 14px; color: var(--text-secondary);
 }
-
-.nav-item.active {
-    background-color: var(--hover-bg);
-    color: var(--text-primary);
+.user-info strong { color: var(--text-primary); }
+.logout-link {
+    display: flex; align-items: center; gap: 6px;
+    text-decoration: none; color: var(--text-secondary);
 }
-
-/* Submenu */
-.nav-item.has-submenu::after {
-    content: '›';
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    font-size: 24px;
-    transform: translateY(-50%) rotate(90deg);
-    transition: transform 0.3s ease;
+.logout-link:hover { color: var(--text-primary); }
+.page-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px;
 }
+.page-header h2 { font-size: 28px; margin: 0; font-weight: 700; }
 
-.nav-group.open .nav-item.has-submenu::after {
-    transform: translateY(-50%) rotate(-90deg);
-}
-
-.submenu {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease-in-out;
-    padding-left: 15px;
-}
-
-.nav-group.open .submenu {
-    max-height: 200px;
-}
-
-.submenu-item {
-    display: block;
-    color: var(--text-secondary);
-    text-decoration: none;
-    padding: 10px 15px 10px 20px;
-    border-radius: 8px;
-    font-size: 15px;
-    position: relative;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.submenu-item.active, .submenu-item:hover {
-    background-color: var(--hover-bg);
-    color: var(--text-primary);
-}
-
-/* Botão Sair */
-.logout-button {
-    /* ... estilos existentes ... */
-}
-
-/* Área de Conteúdo Principal */
-.content-area {
-    flex-grow: 1;
-    padding: 40px;
-    overflow-y: auto;
-}
-
-.content-header h1 {
-    font-size: 32px;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.content-header p {
-    font-size: 18px;
-    color: var(--text-secondary);
-    margin-top: 5px;
-}
-
-/* Cards e Tabela */
-.card, .table-container {
-    background: var(--card-bg);
-    padding: 25px;
-    border-radius: 15px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 8px 20px var(--shadow-color);
-    transition: background-color 0.3s, border-color 0.3s;
-}
-
-.card h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.card .card-value {
-    margin: 10px 0 0 0;
-    font-size: 36px;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    color: var(--text-secondary);
-}
-
-th, td {
-    padding: 15px;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-}
-
-thead th {
-    color: var(--text-primary);
-    font-weight: 700;
-    font-size: 16px;
-}
-
-tbody tr:hover {
-    background-color: var(--hover-bg);
-}
-
-/* Botões */
-.add-product-btn, .submit-btn {
-    background-color: var(--accent-primary);
-    color: var(--text-on-accent);
-    /* ... outros estilos de botão ... */
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
+/* --- 5. BOTÕES DARK MODE GLASS (ESTILO UNIFICADO) --- */
+.btn {
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+
+    background: var(--glass-btn-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--border-glass);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    color: var(--text-primary);
+    transition: all 0.2s ease-in-out;
 }
 
-.btn-edit {
-    background-color: var(--accent-primary);
-    /* ... */
+.btn:hover {
+    background: var(--glass-btn-bg-hover);
+    transform: translateY(-2px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.btn-delete {
-    background-color: var(--accent-delete);
-    /* ... */
+.btn:active {
+    transform: translateY(0);
 }
+
+/* Variação para o botão primário (+ Cadastrar Item) */
+.btn.btn-primary {
+    background: var(--accent-blue);
+    border: none;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+.btn.btn-primary:hover { background: #2563eb; }
+
+/* Variação para os botões de ação na tabela */
+.action-btn { padding: 6px 14px; font-size: 13px; }
+.action-btn.btn-edit { color: var(--accent-edit); }
+.action-btn.btn-delete { color: var(--accent-delete); }
+
+/* --- 6. CARDS E TABELA --- */
+.stats-cards {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px; margin-bottom: 32px;
+}
+.card, .recent-activities {
+    background-color: var(--card-bg);
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+.card-icon {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.card-icon.icon-sku { background-color: #1e3a8a; color: #93c5fd; }
+.card-icon.icon-alert { background-color: #9a3412; color: #fdba74; }
+.card-icon.icon-empty { background-color: #991b1b; color: #fca5a5; }
+.card-info .card-value { font-size: 28px; font-weight: 700; display: block; }
+.card-info .card-label { font-size: 14px; color: var(--text-secondary); }
+.recent-activities h3 { margin-top: 0; font-size: 18px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
+thead th { font-size: 12px; text-transform: uppercase; color: var(--text-secondary); }
+tbody tr:last-child td { border-bottom: none; }
+.tag {
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+}
+.tag-entrada { background-color: var(--tag-entrada-bg); color: var(--tag-text); }
+.tag-saida { background-color: var(--tag-saida-bg); color: var(--tag-text); }
