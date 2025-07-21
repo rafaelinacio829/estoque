@@ -66,6 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
+        const cadastrarItemBtn = document.getElementById('cadastrarItemBtn');
+        if (cadastrarItemBtn) {
+            cadastrarItemBtn.addEventListener('click', () => {
+                // Redireciona para a página de produtos
+                window.location.href = 'produtos.html';
+            });
+        }
 
         // --- CHAMADA DAS FUNÇÕES ---
         // Busca os dados para ambos os cards assim que a página carrega
@@ -79,5 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Você pode adicionar outras funções para os outros cards aqui no futuro
     // fetchLowStockCount();
     // fetchPendingOrdersCount();
+
 
 });
