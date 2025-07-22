@@ -26,4 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
             dashboardLink.classList.add('active');
         }
     }
+
+    // Recupera o nível do usuário do localStorage
+    const nivel = localStorage.getItem('nivel');
+    // Esconde a aba Usuários se não for administrador
+    if (nivel !== 'administrador') {
+        const usuariosLink = document.querySelector('.sidebar-nav .nav-link span');
+        if (usuariosLink && usuariosLink.textContent.trim() === 'Usuários') {
+            usuariosLink.parentElement.style.display = 'none';
+        }
+    }
 });

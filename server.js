@@ -226,6 +226,76 @@ app.get('/api/atividades-recentes', async (req, res) => {
     }
 });
 
+// --- ROTAS DA API DE COLABORADORES ---
+
+// Listar todos os colaboradores
+app.get('/api/colaboradores', async (req, res) => {
+    try {
+        const sql = 'SELECT id, nome, email, cargo, DATE_FORMAT(data_admissao, "%d/%m/%Y") as data_admissao, status FROM colaboradores ORDER BY nome ASC';
+        const [colaboradores] = await pool.query(sql);
+        res.json(colaboradores);
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+    }
+});
+
+// Buscar um único colaborador pelo ID
+app.get('/api/colaboradores/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const sql = 'SELECT id, nome, email, cargo, data_admissao, status FROM colaboradores WHERE id = ?';
+        const [rows] = await pool.query(sql, [id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Colaborador não encontrado.' });
+        }
+        res.json(rows[0]);
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+    }
+});
+
+// Adicionar um novo colaborador
+app.post('/api/colaboradores', async (req, res) => {
+    try {
+        const { nome, email, cargo, data_admissao, status } = req.body;
+        if (!nome || !email) {
+            return res.status(400).json({ success: false, message: 'Nome e email são obrigatórios.' });
+        }
+        const sql = 'INSERT INTO colaboradores (nome, email, cargo, data_admissao, status) VALUES (?, ?, ?, ?, ?)';
+        const [result] = await pool.query(sql, [nome, email, cargo, data_admissao, status]);
+        res.status(201).json({ success: true, message: 'Colaborador adicionado!', collaboratorId: result.insertId });
+    } catch (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ success: false, message: 'O email informado já está em uso.' });
+        }
+        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+    }
+});
+
+// Editar (Atualizar) um colaborador
+app.put('/api/colaboradores/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nome, email, cargo, data_admissao, status } = req.body;
+        const sql = 'UPDATE colaboradores SET nome = ?, email = ?, cargo = ?, data_admissao = ?, status = ? WHERE id = ?';
+        await pool.query(sql, [nome, email, cargo, data_admissao, status, id]);
+        res.json({ success: true, message: 'Colaborador atualizado!' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+    }
+});
+
+// Excluir um colaborador
+app.delete('/api/colaboradores/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const sql = 'DELETE FROM colaboradores WHERE id = ?';
+        await pool.query(sql, [id]);
+        res.json({ success: true, message: 'Colaborador excluído!' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+    }
+});
 // Inicia o servidor
 app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
