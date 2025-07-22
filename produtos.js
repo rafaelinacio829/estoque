@@ -122,5 +122,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Botão Registrar Saída
+    const registrarSaidaBtn = document.getElementById('registrarSaidaBtn');
+    const saidaModal = document.getElementById('saidaModal');
+    const closeSaidaModalBtn = document.getElementById('closeSaidaModalBtn');
+    const saidaForm = document.getElementById('saidaForm');
+
+    registrarSaidaBtn.addEventListener('click', () => {
+        saidaModal.style.display = 'block';
+    });
+    closeSaidaModalBtn.addEventListener('click', () => {
+        saidaModal.style.display = 'none';
+        saidaForm.reset();
+    });
+    window.addEventListener('click', (event) => {
+        if (event.target === saidaModal) {
+            saidaModal.style.display = 'none';
+            saidaForm.reset();
+        }
+    });
+    saidaForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const produto = document.getElementById('produtoSaida').value;
+        const quantidade = parseInt(document.getElementById('quantidadeSaida').value, 10);
+        try {
+            const response = await fetch('/api/saida', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ produto, quantidade })
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert('Saída registrada com sucesso!');
+                saidaModal.style.display = 'none';
+                saidaForm.reset();
+                // Aqui você pode atualizar a tabela de produtos ou atividades se desejar
+            } else {
+                alert('Erro ao registrar saída: ' + (result.message || ''));
+            }
+        } catch (error) {
+            alert('Erro de conexão com o servidor.');
+        }
+    });
+
     fetchProducts();
 });

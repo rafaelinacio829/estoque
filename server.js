@@ -49,7 +49,7 @@ app.post('/login', async (req, res) => {
         }
         const match = await bcrypt.compare(password, user.password);
         if (match) {
-            res.json({ success: true });
+            res.json({ success: true, nivel: user.nivel });
         } else {
             res.status(401).json({ success: false, message: 'Usuário ou senha inválidos.' });
         }
@@ -180,6 +180,48 @@ app.delete('/api/produtos/:id', async (req, res) => {
         res.json({ success: true, message: 'Produto excluído com sucesso!' });
     } catch (err) {
         console.error(`[ERRO] Falha ao excluir produto ${req.params.id}:`, err);
+        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+    }
+});
+
+// Registrar saída de produto
+app.post('/api/saida', async (req, res) => {
+    const { produto, quantidade } = req.body;
+    if (!produto || !quantidade || quantidade < 1) {
+        return res.status(400).json({ success: false, message: 'Produto e quantidade são obrigatórios.' });
+    }
+    try {
+        // Buscar produto por ID ou SKU
+        let sql = 'SELECT * FROM produtos WHERE id = ? OR sku = ? LIMIT 1';
+        const [rows] = await pool.query(sql, [produto, produto]);
+        const prod = rows[0];
+        if (!prod) {
+            return res.status(404).json({ success: false, message: 'Produto não encontrado.' });
+        }
+        if (prod.estoque < quantidade) {
+            return res.status(400).json({ success: false, message: 'Estoque insuficiente.' });
+        }
+        // Atualizar estoque
+        sql = 'UPDATE produtos SET estoque = estoque - ? WHERE id = ?';
+        await pool.query(sql, [quantidade, prod.id]);
+        // Registrar atividade
+        sql = 'INSERT INTO atividades (tipo, produto, quantidade, data) VALUES (?, ?, ?, NOW())';
+        await pool.query(sql, ['Saída', prod.nome, quantidade]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('[ERRO] Falha ao registrar saída:', err);
+        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+    }
+});
+
+// Listar atividades recentes
+app.get('/api/atividades-recentes', async (req, res) => {
+    try {
+        const sql = 'SELECT tipo, produto, quantidade, DATE_FORMAT(data, "%d/%m/%Y, %H:%i:%s") as data FROM atividades ORDER BY data DESC LIMIT 10';
+        const [rows] = await pool.query(sql);
+        res.json(rows);
+    } catch (err) {
+        console.error('[ERRO] Falha ao buscar atividades recentes:', err);
         res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
     }
 });

@@ -88,4 +88,75 @@ document.addEventListener('DOMContentLoaded', () => {
     // fetchPendingOrdersCount();
 
 
+    // Botão Registrar Saída - Dashboard
+    const registrarSaidaBtn = document.getElementById('registrarSaidaBtn');
+    const saidaModal = document.getElementById('saidaModal');
+    const closeSaidaModalBtn = document.getElementById('closeSaidaModalBtn');
+    const saidaForm = document.getElementById('saidaForm');
+
+    registrarSaidaBtn.addEventListener('click', () => {
+        saidaModal.style.display = 'block';
+    });
+    closeSaidaModalBtn.addEventListener('click', () => {
+        saidaModal.style.display = 'none';
+        saidaForm.reset();
+    });
+    window.addEventListener('click', (event) => {
+        if (event.target === saidaModal) {
+            saidaModal.style.display = 'none';
+            saidaForm.reset();
+        }
+    });
+
+    // Função para buscar atividades recentes
+    async function fetchRecentActivities() {
+        try {
+            const response = await fetch('/api/atividades-recentes');
+            const atividades = await response.json();
+            const tbody = document.querySelector('.recent-activities tbody');
+            tbody.innerHTML = '';
+            atividades.forEach(atividade => {
+                const tipoTag = atividade.tipo === 'Saída'
+                    ? '<span class="tag tag-saida">Saída</span>'
+                    : '<span class="tag tag-entrada">Entrada</span>';
+                const row = `<tr>
+                    <td>${tipoTag}</td>
+                    <td>${atividade.produto}</td>
+                    <td>${atividade.quantidade}</td>
+                    <td>${atividade.data}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        } catch (error) {
+            // Em caso de erro, mantém a tabela como está
+        }
+    }
+
+    // Chama ao carregar a página
+    fetchRecentActivities();
+
+    saidaForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const produto = document.getElementById('produtoSaida').value;
+        const quantidade = parseInt(document.getElementById('quantidadeSaida').value, 10);
+        try {
+            const response = await fetch('/api/saida', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ produto, quantidade })
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert('Saída registrada com sucesso!');
+                saidaModal.style.display = 'none';
+                saidaForm.reset();
+                fetchRecentActivities(); // Atualiza atividades
+            } else {
+                alert('Erro ao registrar saída: ' + (result.message || ''));
+            }
+        } catch (error) {
+            alert('Erro de conexão com o servidor.');
+        }
+    });
+
 });
