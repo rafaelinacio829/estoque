@@ -150,6 +150,21 @@ app.delete('/api/produtos/:id', verifyToken, async (req, res) => {
         res.status(500).json({message: 'Erro no servidor'});
     }
 });
+// Buscar um único produto pelo ID
+app.get('/api/produtos/:id', verifyToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const sql = 'SELECT * FROM produtos WHERE id = ?';
+        const [rows] = await pool.query(sql, [id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Produto não encontrado.'});
+        }
+        res.json(rows[0]);
+    } catch (err) {
+        console.error(`[ERRO] Falha ao buscar produto ${req.params.id}:`, err);
+        res.status(500).json({message: 'Erro no servidor'});
+    }
+});
 
 // --- Seção: Colaboradores (Rotas Protegidas) ---
 app.get('/api/colaboradores', verifyToken, async (req, res) => {

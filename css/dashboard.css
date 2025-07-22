@@ -178,3 +178,19 @@ tbody tr:last-child td { border-bottom: none; }
 .tag-entrada {
     background: #22c55e;
 }
+/* --- ESTILOS ADICIONAIS PARA PÁGINA DE PRODUTOS --- */
+
+.page-header .header-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn.btn-secondary {
+    background: var(--glass-btn-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-glass);
+}
+
+.btn.btn-secondary:hover {
+    background: var(--glass-btn-bg-hover);
+}
