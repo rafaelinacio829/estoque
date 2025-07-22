@@ -2,44 +2,28 @@ const express = require('express');
 const path = require('path');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken'); // <-- NOVA IMPORTAÇÃO
 
 const app = express();
 const PORT = 3000;
 const saltRounds = 10;
+const JWT_SECRET = 'seu_segredo_super_secreto_aqui_troque_depois'; // <-- TROQUE POR UMA FRASE SEGURA
 
 // --- Configuração da Conexão com o MySQL ---
-const dbConfig = {
-    host: 'interchange.proxy.rlwy.net',
-    user: 'root',
-    password: 'FAhJuZOLrFpMgsgzafFkEBruHxrnbdGz',
-    database: 'railway',
-    port: 51338
-};
-
+const dbConfig = { /* ... suas credenciais do banco ... */ };
 const pool = mysql.createPool(dbConfig);
 
 // Middlewares
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '')));
-
-// ===================================================================
-//         CORREÇÃO: Middleware para desabilitar o cache para a API
-// ===================================================================
-// Esta linha garante que o navegador sempre busque os dados mais
-// recentes do servidor, resolvendo o problema do Status 304.
 app.use('/api', (req, res, next) => {
     res.set('Cache-Control', 'no-store');
     next();
 });
-// ===================================================================
 
-// --- ROTAS DE AUTENTICAÇÃO ---
-
-app.post('/login', async (req, res) => {
+// --- ROTA DE LOGIN ATUALIZADA COM JWT ---
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
-    if (!username || !password) {
-        return res.status(400).json({ success: false, message: 'Usuário e senha são obrigatórios.' });
-    }
     try {
         const sql = 'SELECT * FROM usuarios WHERE username = ?';
         const [rows] = await pool.query(sql, [username]);
@@ -49,7 +33,11 @@ app.post('/login', async (req, res) => {
         }
         const match = await bcrypt.compare(password, user.password);
         if (match) {
-            res.json({ success: true, nivel: user.nivel });
+            // Se a senha estiver correta, crie um token
+            const payload = { id: user.id, username: user.username, nivel: user.nivel };
+            const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '8h' }); // Token expira em 8 horas
+
+            res.json({ success: true, token: token }); // Envia o token para o front-end
         } else {
             res.status(401).json({ success: false, message: 'Usuário ou senha inválidos.' });
         }
@@ -59,253 +47,78 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.post('/register', async (req, res) => {
-    const { username, password } = req.body;
-    if (!username || !password) {
-        return res.status(400).json({ success: false, message: 'Usuário e senha são obrigatórios.' });
-    }
+// --- ROTAS DA API DE USUÁRIOS (CRUD COMPLETO) ---
+
+// Listar todos os usuários
+app.get('/api/usuarios', async (req, res) => {
     try {
+        const sql = 'SELECT id, username, nivel FROM usuarios ORDER BY username ASC';
+        const [users] = await pool.query(sql);
+        res.json(users);
+    } catch (err) { res.status(500).json({ message: 'Erro no servidor' }); }
+});
+
+// Buscar um usuário
+app.get('/api/usuarios/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const sql = 'SELECT id, username, nivel FROM usuarios WHERE id = ?';
+        const [rows] = await pool.query(sql, [id]);
+        res.json(rows[0]);
+    } catch (err) { res.status(500).json({ message: 'Erro no servidor' }); }
+});
+
+// Criar um novo usuário
+app.post('/api/usuarios', async (req, res) => {
+    try {
+        const { username, password, nivel } = req.body;
+        if (!username || !password || !nivel) {
+            return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+        }
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        const sql = 'INSERT INTO usuarios (username, password) VALUES (?, ?)';
-        await pool.query(sql, [username, hashedPassword]);
-        res.status(201).json({ success: true, message: `Usuário ${username} registrado com sucesso!` });
+        const sql = 'INSERT INTO usuarios (username, password, nivel) VALUES (?, ?, ?)';
+        await pool.query(sql, [username, hashedPassword, nivel]);
+        res.status(201).json({ success: true, message: 'Usuário criado com sucesso!' });
     } catch (err) {
         if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({ success: false, message: 'Nome de usuário já existe.' });
+            return res.status(409).json({ message: 'Nome de usuário já existe.' });
         }
-        console.error("Erro na rota de registro:", err);
-        res.status(500).json({ success: false, message: 'Erro ao processar o registro.' });
+        res.status(500).json({ message: 'Erro no servidor' });
     }
 });
 
-// --- ROTAS DA API DE PRODUTOS ---
-
-// Adicionar um novo produto
-app.post('/api/produtos', async (req, res) => {
-    const { nome, sku, estoque, preco } = req.body;
-    if (!nome || !sku || estoque === undefined || !preco) {
-        return res.status(400).json({ success: false, message: 'Todos os campos são obrigatórios.' });
-    }
-    try {
-        const sql = 'INSERT INTO produtos (nome, sku, estoque, preco) VALUES (?, ?, ?, ?)';
-        const [result] = await pool.query(sql, [nome, sku, estoque, preco]);
-        res.status(201).json({ success: true, message: 'Produto adicionado com sucesso!', productId: result.insertId });
-    } catch (err) {
-        if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({ success: false, message: 'O SKU informado já existe.' });
-        }
-        console.error("[ERRO] Falha ao adicionar produto:", err);
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
-});
-
-// Listar todos os produtos
-app.get('/api/produtos', async (req, res) => {
-    try {
-        const sql = 'SELECT * FROM produtos ORDER BY id DESC';
-        const [products] = await pool.query(sql);
-        res.json(products);
-    } catch (err) {
-        console.error("[ERRO] Falha ao listar produtos:", err);
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
-});
-
-// Contar produtos com baixo estoque (estoque < 2)
-app.get('/api/produtos/low-stock-count', async (req, res) => {
-    try {
-        const sql = 'SELECT COUNT(*) as total FROM produtos WHERE estoque < 2';
-        const [rows] = await pool.query(sql);
-        res.json({ success: true, total: rows[0].total });
-    } catch (err) {
-        console.error("[ERRO] Falha ao contar produtos com baixo estoque:", err);
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
-});
-
-// Contar o total de produtos
-app.get('/api/produtos/count', async (req, res) => {
-    try {
-        const sql = 'SELECT COUNT(*) as total FROM produtos';
-        const [rows] = await pool.query(sql);
-        res.json({ success: true, total: rows[0].total });
-    } catch (err) {
-        console.error("[ERRO] Falha ao contar produtos:", err);
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
-});
-
-// Buscar um único produto pelo ID
-app.get('/api/produtos/:id', async (req, res) => {
+// Atualizar um usuário
+app.put('/api/usuarios/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const sql = 'SELECT * FROM produtos WHERE id = ?';
-        const [rows] = await pool.query(sql, [id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ success: false, message: 'Produto não encontrado.' });
+        const { username, nivel, password } = req.body; // Password é opcional
+        if (password && password.trim() !== '') {
+            // Se uma nova senha foi enviada, atualize-a
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+            const sql = 'UPDATE usuarios SET username = ?, nivel = ?, password = ? WHERE id = ?';
+            await pool.query(sql, [username, nivel, hashedPassword, id]);
+        } else {
+            // Se não, atualize apenas o nome e o nível
+            const sql = 'UPDATE usuarios SET username = ?, nivel = ? WHERE id = ?';
+            await pool.query(sql, [username, nivel, id]);
         }
-        res.json(rows[0]);
-    } catch (err) {
-        console.error(`[ERRO] Falha ao buscar produto ${req.params.id}:`, err);
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
+        res.json({ success: true, message: 'Usuário atualizado com sucesso!' });
+    } catch (err) { res.status(500).json({ message: 'Erro no servidor' }); }
 });
 
-// Editar (Atualizar) um produto existente
-app.put('/api/produtos/:id', async (req, res) => {
+// Deletar um usuário
+app.delete('/api/usuarios/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { nome, sku, estoque, preco } = req.body;
-        if (!nome || !sku || estoque === undefined || !preco) {
-            return res.status(400).json({ success: false, message: 'Todos os campos são obrigatórios.' });
-        }
-        const sql = 'UPDATE produtos SET nome = ?, sku = ?, estoque = ?, preco = ? WHERE id = ?';
-        await pool.query(sql, [nome, sku, estoque, preco, id]);
-        res.json({ success: true, message: 'Produto atualizado com sucesso!' });
-    } catch (err) {
-        console.error(`[ERRO] Falha ao atualizar produto ${req.params.id}:`, err);
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
+        await pool.query('DELETE FROM usuarios WHERE id = ?', [id]);
+        res.json({ success: true, message: 'Usuário excluído com sucesso!' });
+    } catch (err) { res.status(500).json({ message: 'Erro no servidor' }); }
 });
 
-// Excluir um produto
-app.delete('/api/produtos/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const sql = 'DELETE FROM produtos WHERE id = ?';
-        const [result] = await pool.query(sql, [id]);
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ success: false, message: 'Produto não encontrado.' });
-        }
-        res.json({ success: true, message: 'Produto excluído com sucesso!' });
-    } catch (err) {
-        console.error(`[ERRO] Falha ao excluir produto ${req.params.id}:`, err);
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
-});
 
-// Registrar saída de produto
-app.post('/api/saida', async (req, res) => {
-    const { produto, quantidade } = req.body;
-    if (!produto || !quantidade || quantidade < 1) {
-        return res.status(400).json({ success: false, message: 'Produto e quantidade são obrigatórios.' });
-    }
-    try {
-        // Buscar produto por ID ou SKU
-        let sql = 'SELECT * FROM produtos WHERE id = ? OR sku = ? LIMIT 1';
-        const [rows] = await pool.query(sql, [produto, produto]);
-        const prod = rows[0];
-        if (!prod) {
-            return res.status(404).json({ success: false, message: 'Produto não encontrado.' });
-        }
-        if (prod.estoque < quantidade) {
-            return res.status(400).json({ success: false, message: 'Estoque insuficiente.' });
-        }
-        // Atualizar estoque
-        sql = 'UPDATE produtos SET estoque = estoque - ? WHERE id = ?';
-        await pool.query(sql, [quantidade, prod.id]);
-        // Registrar atividade
-        sql = 'INSERT INTO atividades (tipo, produto, quantidade, data) VALUES (?, ?, ?, NOW())';
-        await pool.query(sql, ['Saída', prod.nome, quantidade]);
-        res.json({ success: true });
-    } catch (err) {
-        console.error('[ERRO] Falha ao registrar saída:', err);
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
-});
+// ... (SUAS ROTAS DE PRODUTOS E COLABORADORES CONTINUAM AQUI) ...
 
-// Listar atividades recentes
-app.get('/api/atividades-recentes', async (req, res) => {
-    try {
-        const sql = 'SELECT tipo, produto, quantidade, DATE_FORMAT(data, "%d/%m/%Y, %H:%i:%s") as data FROM atividades ORDER BY data DESC LIMIT 10';
-        const [rows] = await pool.query(sql);
-        res.json(rows);
-    } catch (err) {
-        console.error('[ERRO] Falha ao buscar atividades recentes:', err);
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
-});
 
-// --- ROTAS DA API DE COLABORADORES ---
-
-// Listar todos os colaboradores
-app.get('/api/colaboradores', async (req, res) => {
-    try {
-        const sql = 'SELECT id, nome, email, cargo, DATE_FORMAT(data_admissao, "%d/%m/%Y") as data_admissao, status FROM colaboradores ORDER BY nome ASC';
-        const [colaboradores] = await pool.query(sql);
-        res.json(colaboradores);
-    } catch (err) {
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
-});
-
-// Buscar um único colaborador pelo ID
-app.get('/api/colaboradores/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const sql = 'SELECT id, nome, email, cargo, data_admissao, status FROM colaboradores WHERE id = ?';
-        const [rows] = await pool.query(sql, [id]);
-        if (rows.length === 0) {
-            return res.status(404).json({ success: false, message: 'Colaborador não encontrado.' });
-        }
-        res.json(rows[0]);
-    } catch (err) {
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
-});
-
-// Adicionar um novo colaborador
-app.post('/api/colaboradores', async (req, res) => {
-    try {
-        const { nome, email, cargo, data_admissao, status } = req.body;
-        if (!nome || !email) {
-            return res.status(400).json({ success: false, message: 'Nome e email são obrigatórios.' });
-        }
-        const sql = 'INSERT INTO colaboradores (nome, email, cargo, data_admissao, status) VALUES (?, ?, ?, ?, ?)';
-        const [result] = await pool.query(sql, [nome, email, cargo, data_admissao, status]);
-        res.status(201).json({ success: true, message: 'Colaborador adicionado!', collaboratorId: result.insertId });
-    } catch (err) {
-        if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({ success: false, message: 'O email informado já está em uso.' });
-        }
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
-});
-
-// Editar (Atualizar) um colaborador
-app.put('/api/colaboradores/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { nome, email, cargo, data_admissao, status } = req.body;
-        const sql = 'UPDATE colaboradores SET nome = ?, email = ?, cargo = ?, data_admissao = ?, status = ? WHERE id = ?';
-        await pool.query(sql, [nome, email, cargo, data_admissao, status, id]);
-        res.json({ success: true, message: 'Colaborador atualizado!' });
-    } catch (err) {
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
-});
-
-// Excluir um colaborador
-app.delete('/api/colaboradores/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const sql = 'DELETE FROM colaboradores WHERE id = ?';
-        await pool.query(sql, [id]);
-        res.json({ success: true, message: 'Colaborador excluído!' });
-    } catch (err) {
-        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-    }
-});
-// Inicia o servidor
 app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
-    pool.getConnection()
-        .then(connection => {
-            console.log('Conectado ao MySQL com sucesso!');
-            connection.release();
-        })
-        .catch(err => {
-            console.error('ERRO AO CONECTAR COM O MYSQL:', err.message);
-            console.error('Verifique suas credenciais no arquivo server.js (dbConfig)');
-        });
 });

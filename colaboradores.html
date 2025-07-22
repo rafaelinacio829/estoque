@@ -13,19 +13,48 @@
 <div class="dashboard-container">
     <aside class="sidebar">
         <div class="sidebar-header">
+            <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12v-2a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v2a3 3 0 0 0 3 3h2a3 3 0 0 1 3 3v2a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-2a3 3 0 0 1 3-3h2a3 3 0 0 0 3-3Z"/><path d="M12 12h2a3 3 0 0 1 3 3v2a3 3 0 0 1-3 3h-2a3 3 0 0 0-3 3v2a3 3 0 0 0 3 3h2a3 3 0 0 0 3-3v-2a3 3 0 0 0-3-3h-2a3 3 0 0 1-3-3Z"/></svg>
             <h1>StockFlow</h1>
         </div>
         <nav class="sidebar-nav">
             <ul>
-                <li><a href="dashboard.html" class="nav-link"><span>Dashboard</span></a></li>
-                <li class="nav-group"><a href="#" class="nav-link has-submenu"><span>Produtos</span></a><ul class="submenu"><li><a href="produtos.html">Listar Produtos</a></li><li><a href="#">Categorias</a></li></ul></li>
-                <li><a href="colaboradores.html" class="nav-link active"><span>Colaboradores</span></a></li>
-                <li><a href="#" class="nav-link"><span>Usuários</span></a></li>
+                <li><a href="dashboard.html" class="nav-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span>Dashboard</span>
+                </a></li>
+                <li class="nav-group">
+                    <a href="#" class="nav-link has-submenu">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.21 9 5.15"/><path d="M21 14h-7a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h7v4Z"/><path d="M3.29 7 12 12l8.71-5"/><path d="M12 22V12"/></svg>
+                        <span>Produtos</span>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="produtos.html">Listar Produtos</a></li>
+                        <li><a href="#">Categorias</a></li>
+                    </ul>
+                </li>
+                <li><a href="colaboradores.html" class="nav-link active">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>Colaboradores</span>
+                </a></li>
+                <li><a href="usuarios.html" class="nav-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.93 19.07 1.41-1.41"/><path d="m17.66 6.34 1.41-1.41"/></svg>
+                    <span>Usuários</span>
+                </a></li>
             </ul>
         </nav>
     </aside>
+
     <div class="main-content">
-        <header class="main-header"></header>
+        <header class="main-header">
+            <div class="user-info">
+                <span>Bem-vindo(a), <strong>rafael</strong></span>
+                <a href="/index.html" class="logout-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Sair
+                </a>
+            </div>
+        </header>
+
         <main>
             <div class="page-header">
                 <h2>Gerenciamento de Colaboradores</h2>
