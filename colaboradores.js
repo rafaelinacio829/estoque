@@ -1,4 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- 1. VERIFICAÇÃO DE AUTENTICAÇÃO ---
+    const token = localStorage.getItem('token');
+    if (!token) {
+        // Se não houver token, o usuário não está logado. Redireciona para o login.
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // --- 2. CABEÇALHOS DE AUTENTICAÇÃO PARA A API ---
+    // Headers para requisições que enviam dados (POST, PUT)
+    const authHeadersJSON = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+    // Headers para requisições que apenas buscam dados (GET, DELETE)
+    const authHeaders = {
+        'Authorization': `Bearer ${token}`
+    };
+
+    // Mapeamento dos elementos do DOM
     const modal = document.getElementById('collaboratorModal');
     const openModalBtn = document.getElementById('openModalBtn');
     const closeModalBtn = document.getElementById('closeModalBtn');
@@ -33,7 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fetchData = async () => {
         try {
-            const response = await fetch('/api/colaboradores');
+            // --- 3. ENVIA O TOKEN NA REQUISIÇÃO ---
+            const response = await fetch('/api/colaboradores', { headers: authHeaders });
+            if(response.status === 401 || response.status === 403) { window.location.href = 'login.html'; return; }
             const data = await response.json();
             renderTable(data);
         } catch (error) { console.error('Erro ao buscar colaboradores:', error); }
@@ -49,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const openModalForEdit = async (id) => {
         try {
-            const response = await fetch(`/api/colaboradores/${id}`);
+            const response = await fetch(`/api/colaboradores/${id}`, { headers: authHeaders });
             const data = await response.json();
             document.getElementById('nome').value = data.nome;
             document.getElementById('email').value = data.email;
@@ -82,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = isEditing ? `/api/colaboradores/${editingCollaboratorId}` : '/api/colaboradores';
         const method = isEditing ? 'PUT' : 'POST';
         try {
-            const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+            const response = await fetch(url, { method, headers: authHeadersJSON, body: JSON.stringify(formData) });
             const result = await response.json();
             if (result.success) {
                 closeModal();
@@ -101,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target.classList.contains('btn-delete')) {
             if (confirm(`Tem certeza que deseja excluir?`)) {
                 try {
-                    const response = await fetch(`/api/colaboradores/${id}`, { method: 'DELETE' });
+                    const response = await fetch(`/api/colaboradores/${id}`, { method: 'DELETE', headers: authHeaders });
                     const result = await response.json();
                     if (result.success) fetchData(); else alert(`Erro: ${result.message}`);
                 } catch (error) { alert('Não foi possível conectar ao servidor.'); }
