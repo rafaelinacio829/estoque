@@ -118,7 +118,6 @@
     </form>
   </div>
 </div>
-
 <div id="saidaModal" class="modal">
   <div class="modal-content">
     <header class="modal-header">
@@ -128,14 +127,16 @@
     <form id="saidaForm">
       <div class="form-group">
         <label for="produtoSaida">Produto</label>
-        <input type="text" id="produtoSaida" name="produtoSaida" required placeholder="Nome ou SKU">
+        <select id="produtoSaida" required>
+          <option value="">Carregando produtos...</option>
+        </select>
       </div>
       <div class="form-group">
         <label for="quantidadeSaida">Quantidade</label>
-        <input type="number" id="quantidadeSaida" name="quantidadeSaida" required min="1" value="1">
+        <input type="number" id="quantidadeSaida" min="1" required>
       </div>
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Registrar Saída</button>
+        <button type="submit" class="btn btn-primary">Confirmar Saída</button>
       </div>
     </form>
   </div>
@@ -143,6 +144,5 @@
 
 <script src="sidebar.js"></script>
 <script src="produtos.js"></script>
-
 </body>
 </html>
