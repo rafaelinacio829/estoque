@@ -68,7 +68,117 @@ app.post('/api/login', async (req, res) => {
         res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
     }
 });
+// --- MIDDLEWARE DE AUTENTICAÇÃO ---
+// Vamos usar isso para proteger nossas rotas da API
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Formato "Bearer TOKEN"
 
+    if (token == null) {
+        return res.sendStatus(401); // Não autorizado se não houver token
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            return res.sendStatus(403); // Proibido se o token não for válido
+        }
+        req.user = user; // Salva os dados do usuário do token na requisição
+        next(); // Passa para a próxima função (a rota em si)
+    });
+}
+
+// Middleware para verificar se o usuário é Administrador
+function isAdmin(req, res, next) {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Acesso negado. Requer privilégios de administrador.' });
+    }
+    next();
+}
+
+
+// --- ROTAS DA API PARA USUÁRIOS (CRUD) ---
+
+// GET - Listar todos os usuários
+app.get('/api/users', authenticateToken, isAdmin, async (req, res) => {
+    try {
+        const sql = "SELECT id, nome, sobrenome, username, role FROM usuarios"; // Não selecionamos a senha
+        const [users] = await db.query(sql);
+        res.json(users);
+    } catch (error) {
+        console.error("Erro ao buscar usuários:", error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
+// POST - Criar um novo usuário
+app.post('/api/users', authenticateToken, isAdmin, async (req, res) => {
+    const { nome, sobrenome, password, role } = req.body;
+    if (!nome || !sobrenome || !password || !role) {
+        return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
+    }
+
+    try {
+        const username = `${nome.toLowerCase()}.${sobrenome.toLowerCase()}`;
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const sql = "INSERT INTO usuarios (nome, sobrenome, username, senha, role) VALUES (?, ?, ?, ?, ?)";
+        const [result] = await db.query(sql, [nome, sobrenome, username, hashedPassword, role]);
+
+        res.status(201).json({ id: result.insertId, message: 'Usuário criado com sucesso!' });
+    } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ error: 'Este nome de usuário já existe.' });
+        }
+        console.error("Erro ao criar usuário:", error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
+// PUT - Editar um usuário existente
+app.put('/api/users/:id', authenticateToken, isAdmin, async (req, res) => {
+    const { id } = req.params;
+    const { nome, sobrenome, password, role } = req.body;
+
+    try {
+        let sql = 'UPDATE usuarios SET nome = ?, sobrenome = ?, role = ?';
+        const params = [nome, sobrenome, role];
+
+        // Apenas atualiza a senha se uma nova foi fornecida
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            sql += ', senha = ?';
+            params.push(hashedPassword);
+        }
+
+        sql += ' WHERE id = ?';
+        params.push(id);
+
+        await db.query(sql, params);
+        res.json({ message: 'Usuário atualizado com sucesso!' });
+    } catch (error) {
+        console.error("Erro ao atualizar usuário:", error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
+// DELETE - Deletar um usuário
+app.delete('/api/users/:id', authenticateToken, isAdmin, async (req, res) => {
+    const { id } = req.params;
+
+    // Medida de segurança para não se auto-deletar
+    if (id == req.user.userId) {
+        return res.status(400).json({ error: 'Você não pode deletar a si mesmo.' });
+    }
+
+    try {
+        const sql = "DELETE FROM usuarios WHERE id = ?";
+        await db.query(sql, [id]);
+        res.json({ message: 'Usuário deletado com sucesso!' });
+    } catch (error) {
+        console.error("Erro ao deletar usuário:", error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
 // --- Seção: Produtos (Rotas Protegidas) ---
 app.post('/api/produtos', verifyToken, async (req, res) => {
     try {
@@ -287,6 +397,52 @@ app.post('/api/saida', verifyToken, async (req, res) => {
     } finally {
         // Libera a conexão de volta para o pool
         connection.release();
+    }
+});
+// Adicione este código ao seu server.js
+
+// --- ROTA DA API PARA ESTATÍSTICAS DO DASHBOARD ---
+app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
+    try {
+        // Consulta para contar o total de produtos únicos (SKUs)
+        const [products] = await db.query('SELECT COUNT(*) as count FROM produtos');
+
+        // Consulta para contar itens com estoque baixo ou zerado
+        const [lowStock] = await db.query('SELECT COUNT(*) as count FROM produtos WHERE quantidade <= estoque_minimo');
+        const [noStock] = await db.query('SELECT COUNT(*) as count FROM produtos WHERE quantidade = 0');
+
+        res.json({
+            productCount: products[0].count,
+            lowStockCount: lowStock[0].count,
+            noStockCount: noStock[0].count
+        });
+    } catch (error) {
+        console.error("Erro ao buscar estatísticas:", error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
+
+// --- ROTA DA API PARA ATIVIDADES RECENTES ---
+app.get('/api/dashboard/activities', authenticateToken, async (req, res) => {
+    try {
+        // Busca as 10 atividades mais recentes, juntando nomes de outras tabelas
+        const sql = `
+      SELECT 
+        a.tipo, 
+        p.nome as produtoNome, 
+        a.quantidade, 
+        a.timestamp 
+      FROM atividades a
+      JOIN produtos p ON a.produto_id = p.id
+      ORDER BY a.timestamp DESC 
+      LIMIT 10
+    `;
+        const [activities] = await db.query(sql);
+        res.json(activities);
+    } catch (error) {
+        console.error("Erro ao buscar atividades:", error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 // ===================================================================
